@@ -3,20 +3,16 @@
 # --- verify_merge_back.sh ---
 # Este script verifica se o último commit da branch de destino (ex: main)
 # está presente na branch de origem (sua feature branch).
-# Isso garante que a branch de origem está atualizada antes do merge.
 
-# Encerra o script imediatamente se um comando falhar.
 set -e
 
 # --- Configuração ---
-# Defina a branch de destino que você quer verificar.
-# Em um ambiente de CI/CD real, isso pode ser definido dinamicamente.
-# Exemplo para GitHub Actions: TARGET_BRANCH="${{ github.base_ref }}"
-# Exemplo para GitLab CI: TARGET_BRANCH="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
-TARGET_BRANCH="master"
+# A branch de destino é lida da variável de ambiente TARGET_BRANCH.
+# Se a variável não for definida, o script usa "main" como padrão.
+# No workflow do GitHub Actions, nós definimos essa variável para ${{ github.base_ref }}.
+TARGET_BRANCH="${TARGET_BRANCH:-main}"
 
-# O script assume que ele está rodando no checkout da branch de origem.
-# Em um ambiente de CI, a branch de origem geralmente também está disponível em uma variável.
+# A branch de origem é a branch atual que o workflow clonou.
 SOURCE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 echo "--- Verificando o Merge Back ---"
@@ -25,12 +21,12 @@ echo "Branch de Origem:  ${SOURCE_BRANCH}"
 echo "--------------------------------"
 
 # --- Lógica ---
-
-# 1. Garante que temos as informações mais recentes do repositório remoto.
+# Em um ambiente de CI, o checkout já busca do 'origin', então um 'fetch'
+# adicional não é estritamente necessário, mas é uma boa prática para garantir
+# que temos os dados mais recentes.
 echo "Buscando as últimas atualizações do 'origin'..."
 git fetch origin
 
-# 2. Pega o hash (SHA) do commit mais recente na branch de destino remota.
 echo "Obtendo o último commit de 'origin/${TARGET_BRANCH}'..."
 LATEST_TARGET_COMMIT=$(git rev-parse "origin/${TARGET_BRANCH}")
 
@@ -40,11 +36,8 @@ if [ -z "$LATEST_TARGET_COMMIT" ]; then
 fi
 echo "O último commit na '${TARGET_BRANCH}' é: ${LATEST_TARGET_COMMIT}"
 
-# 3. Verifica se o último commit da branch de destino é um ancestral do HEAD da branch de origem.
-# O comando `git merge-base --is-ancestor` retorna 0 se o primeiro commit for um
-# ancestral do segundo, e 1 caso contrário.
 echo "Verificando se a branch de origem está atualizada..."
-if git merge-base --is-ancestor "${LATEST_TARGET_COMMIT}" "origin/${SOURCE_BRANCH}"; then
+if git merge-base --is-ancestor "${LATEST_TARGET_COMMIT}" HEAD; then
     echo "✅ Sucesso: A branch de origem contém o último commit da '${TARGET_BRANCH}'."
     exit 0
 else
