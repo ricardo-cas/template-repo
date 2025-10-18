@@ -5,13 +5,13 @@ name: 'Verify Merge Back'
 
 # Define os gatilhos (triggers) para este workflow
 on:
-  # 1. Executa em pushes diretos para a branch 'main'
+  # 1. Executa em pushes diretos para a branch 'master'
   push:
-    branches: [ main ]
+    branches: [ master ]
   
-  # 2. Executa em eventos de pull request para a branch 'main'
+  # 2. Executa em eventos de pull request para a branch 'master'
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 # Agrupa todos os jobs que serão executados
 jobs:
@@ -37,9 +37,9 @@ jobs:
 
       # 3. Executa o script de verificação
       # A variável de ambiente TARGET_BRANCH é necessária para o contexto de Pull Request.
-      # Para um push direto na 'main', o script usará "main" como padrão,
+      # Para um push direto na 'master', o script usará "master" como padrão,
       # comparando a branch com ela mesma, o que sempre resultará em sucesso.
       - name: Run verify merge back script
         run: .github/scripts/verify_merge_back.sh
         env:
-          TARGET_BRANCH: ${{ github.base_ref || 'main' }}
+          TARGET_BRANCH: ${{ github.base_ref || 'master' }}
