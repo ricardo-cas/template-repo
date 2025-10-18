@@ -1,48 +1,45 @@
-#!/bin/bash
+# .github/workflows/verify_merge_back.yml
 
-# --- verify_merge_back.sh ---
-# Este script verifica se o último commit da branch de destino (ex: main)
-# está presente na branch de origem (sua feature branch).
+# Nome do workflow que aparecerá na aba "Actions" do seu repositório
+name: 'Verify Merge Back'
 
-set -e
+# Define os gatilhos (triggers) para este workflow
+on:
+  # 1. Executa em pushes diretos para a branch 'main'
+  push:
+    branches: [ main ]
+  
+  # 2. Executa em eventos de pull request para a branch 'main'
+  pull_request:
+    branches: [ main ]
 
-# --- Configuração ---
-# A branch de destino é lida da variável de ambiente TARGET_BRANCH.
-# Se a variável não for definida, o script usa "main" como padrão.
-# No workflow do GitHub Actions, nós definimos essa variável para ${{ github.base_ref }}.
-TARGET_BRANCH="${TARGET_BRANCH:-main}"
+# Agrupa todos os jobs que serão executados
+jobs:
+  # Define um único job chamado 'check-if-branch-is-updated'
+  check-if-branch-is-updated:
+    # Nome que será exibido na interface do GitHub
+    name: Check if branch is up-to-date
+    # O tipo de máquina virtual para executar o job
+    runs-on: ubuntu-latest
 
-# A branch de origem é a branch atual que o workflow clonou.
-SOURCE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    # A sequência de passos que o job executará
+    steps:
+      # 1. Clona o repositório
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # 'fetch-depth: 0' garante que todo o histórico de commits seja baixado.
+          fetch-depth: 0
 
-echo "--- Verificando o Merge Back ---"
-echo "Branch de Destino: ${TARGET_BRANCH}"
-echo "Branch de Origem:  ${SOURCE_BRANCH}"
-echo "--------------------------------"
+      # 2. Torna o script executável
+      - name: Make script executable
+        run: chmod +x .github/scripts/verify_merge_back.sh
 
-# --- Lógica ---
-# Em um ambiente de CI, o checkout já busca do 'origin', então um 'fetch'
-# adicional não é estritamente necessário, mas é uma boa prática para garantir
-# que temos os dados mais recentes.
-echo "Buscando as últimas atualizações do 'origin'..."
-git fetch origin
-
-echo "Obtendo o último commit de 'origin/${TARGET_BRANCH}'..."
-LATEST_TARGET_COMMIT=$(git rev-parse "origin/${TARGET_BRANCH}")
-
-if [ -z "$LATEST_TARGET_COMMIT" ]; then
-    echo "Erro: Não foi possível encontrar o último commit da branch '${TARGET_BRANCH}'."
-    exit 1
-fi
-echo "O último commit na '${TARGET_BRANCH}' é: ${LATEST_TARGET_COMMIT}"
-
-echo "Verificando se a branch de origem está atualizada..."
-if git merge-base --is-ancestor "${LATEST_TARGET_COMMIT}" HEAD; then
-    echo "✅ Sucesso: A branch de origem contém o último commit da '${TARGET_BRANCH}'."
-    exit 0
-else
-    echo "❌ Erro: A branch de origem não está atualizada com a '${TARGET_BRANCH}'."
-    echo "O último commit ('${LATEST_TARGET_COMMIT}') da '${TARGET_BRANCH}' não está presente na sua branch."
-    echo "Por favor, faça 'merge' ou 'rebase' da '${TARGET_BRANCH}' na sua branch antes de continuar."
-    exit 1
-fi
+      # 3. Executa o script de verificação
+      # A variável de ambiente TARGET_BRANCH é necessária para o contexto de Pull Request.
+      # Para um push direto na 'main', o script usará "main" como padrão,
+      # comparando a branch com ela mesma, o que sempre resultará em sucesso.
+      - name: Run verify merge back script
+        run: .github/scripts/verify_merge_back.sh
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || 'main' }}
