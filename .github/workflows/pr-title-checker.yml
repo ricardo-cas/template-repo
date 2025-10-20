@@ -15,5 +15,14 @@ jobs:
     steps:
       - name: Validate PR title
         uses: amannn/action-semantic-pull-request@v5
+        with:
+          # Apenas os tipos listados serão válidos.
+          types: |
+            bug
+            feat
+            fix
+            hotfix
+            chore
+            docs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
