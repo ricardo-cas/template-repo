@@ -10,6 +10,9 @@ jobs:
   welcome:
     name: 'Welcome new contributor'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Run First Interaction Action
         uses: actions/first-interaction@v1
