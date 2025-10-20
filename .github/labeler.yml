@@ -1,0 +1,13 @@
+# .github/labeler.yml
+
+# Adiciona o rótulo 'documentation' se qualquer arquivo .md for alterado
+documentation:
+  - '**/*.md'
+
+# Adiciona o rótulo 'frontend' para alterações em arquivos na pasta 'src/components'
+frontend:
+  - 'src/components/**/*'
+
+# Adiciona o rótulo 'ci' para alterações nos workflows do GitHub Actions
+ci:
+  - '.github/workflows/*'
