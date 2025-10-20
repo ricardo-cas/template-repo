@@ -27,6 +27,6 @@ jobs:
           context: .
           # Gera a tag da imagem. Ex: seu-usuario/seu-repo:latest e seu-usuario/seu-repo:<git-sha>
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/seu-repositorio:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/seu-repositorio:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/ricasdev:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/ricasdev:${{ github.sha }}
           push: true
