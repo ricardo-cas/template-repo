@@ -1,0 +1,21 @@
+name: 'First Interaction Welcome'
+
+on:
+  pull_request:
+    types: [opened]
+  issues:
+    types: [opened]
+
+jobs:
+  welcome:
+    name: 'Welcome new contributor'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run First Interaction Action
+        uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            Olá @${{ github.actor }}! 👋 Obrigado por abrir sua primeira issue neste projeto. Agradecemos sua contribuição!
+          pr-message: |
+            Olá @${{ github.actor }}! 🎉 Obrigado por enviar seu primeiro Pull Request. Sua ajuda é muito bem-vinda! Vamos revisar em breve.
