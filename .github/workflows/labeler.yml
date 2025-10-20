@@ -3,6 +3,8 @@ name: 'Label Pull Requests'
 on:
   pull_request:
     types: [ opened ]
+  issues:
+    types: [ all ]
 
 jobs:
   labeler:
